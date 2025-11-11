@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
