@@ -1,18 +1,40 @@
 {
-  "name": "sdk",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "cuehand",
+  "version": "1.0.1",
+  "description": "AI-powered Puppeteer SDK for automated browser actions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx test/index.ts",
+    "build": "tsup src/index.ts --format esm,cjs --dts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {},
+  "keywords": [
+    "sdk",
+    "puppeteer",
+    "automation",
+    "ai",
+    "google-ai",
+    "vercel-ai",
+    "web-scraping",
+    "browser-automation",
+    "intelligent-agent"
+  ],
+  "author": "Sphe",
+  "license": "MIT",
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.31",
+    "ai": "^5.0.92",
+    "puppeteer": "^24.29.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "zod": "^4.1.12"
+  },
   "devDependencies": {
     "@types/node": "^22.13.5",
     "dotenv": "^16.4.7",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
   }
 }
