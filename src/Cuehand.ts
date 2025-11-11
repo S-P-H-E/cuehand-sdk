@@ -10,6 +10,8 @@ import { z } from "zod";
 puppeteer.use(StealthPlugin());
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
+type ScreenshotOptions = Parameters<typeof Page.prototype.screenshot>[0];
+
 export type CuehandType = "LOCAL" | "DOCKER";
 
 // Act options type
@@ -167,9 +169,10 @@ export class Cuehand {
         let processed = rawContent
         processed = processed.replace(/<!--[\s\S]*?-->/g, '')
         processed = processed.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '')
-        processed = processed.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
+        // ! for now we will not remove svg tags
+        // processed = processed.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
         processed = processed.replace(/<(link|meta)[^>]*>/gi, '')
-        const tagsToRemove = ['html', 'body', 'div', 'span', 'section', 'main', 'header', 'footer', 'nav']
+        const tagsToRemove = ['html', 'body', /* 'div', 'span',*/ 'section', 'main', 'header', 'footer', 'nav']
         tagsToRemove.forEach(tag => {
             const openTagPattern = new RegExp(`<${tag}\\b[^>]*>`, 'gi')
             const closeTagPattern = new RegExp(`</${tag}>`, 'gi')
@@ -189,9 +192,16 @@ export class Cuehand {
         console.log("🛑 Browser closed");
     }
 
-    async screenshot(path: `${string}.png` | `${string}.jpeg` | `${string}.webp`) {
-        await this.page.screenshot({ path });
-        console.log(`📸 Screenshot taken to '${path}'`);
+    async screenshot({ path, options }: { path?: `${string}.png` | `${string}.jpeg` | `${string}.webp`, options?: ScreenshotOptions }) {
+        if (path !== undefined) {
+            await this.page.screenshot({ path });
+            console.log(`📸 Screenshot taken to '${path}'`);
+            return "Screenshot Taken";
+        } else {
+            const screenshot = await this.page.screenshot({ ...options });
+            console.log("📸 Screenshot taken");
+            return screenshot;
+        }
     }
 
     async observe(instruction: string) {

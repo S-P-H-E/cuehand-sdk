@@ -5,24 +5,30 @@ import { Cuehand } from "../src"
 async function main() {
   const cuehand = new Cuehand({
     type: "LOCAL",
-    model: google("gemini-1.5-flash"),
-    headless: true,
+    model: google("gemini-2.5-flash"),
+    userDataDir: "./userData",
+    // headless: true,
   })
 
   await cuehand.init()
 
-  // Change this to whatever site you want to experiment on
-  await cuehand.goto("https://example.com")
+  await cuehand.goto("https://www.instagram.com");
 
-  // Observe an element based on a natural language instruction
-  const observed = await cuehand.observe("Find the main heading on the page")
-  console.log("Observed:", observed)
+  const result = await cuehand.observe("find the login button");
 
-  // Take a screenshot to confirm we are on the page
-  await cuehand.screenshot("example.png")
+  if (result.found) {
+      await cuehand.act("type %username% into the email field", {
+      variables: { username: process.env.USER_USERNAME! }
+    });
+
+    await cuehand.act("type %password% into the password field", {
+      variables: { password: process.env.USER_PASSWORD! }
+    });
+
+    await cuehand.act("click the 'Log in' button");
+  }
 
   await cuehand.close()
 }
 
 main()
-

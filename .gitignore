@@ -45,3 +45,6 @@ coverage/
 
 # Misc
 *.tsbuildinfo
+
+# User Data
+userData/
