@@ -1,12 +1,13 @@
 {
   "name": "cuehand",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "AI-powered Puppeteer SDK for automated browser actions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsx test/index.ts",
-    "build": "tsup src/index.ts --format esm,cjs --dts"
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "prepare": "npm run build"
   },
   "keywords": [
     "sdk",

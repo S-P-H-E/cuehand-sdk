@@ -3,12 +3,10 @@ import { google } from "@ai-sdk/google"
 import { Cuehand } from "../src"
 
 async function main() {
-  const model = google("gemini-2.5-flash")
-
   const cuehand = new Cuehand({
     type: "LOCAL",
-    model,
-    headless: false
+    model: google("gemini-1.5-flash"),
+    headless: true,
   })
 
   await cuehand.init()

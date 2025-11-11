@@ -79,49 +79,18 @@ export class Cuehand {
         console.log(`🌐 Navigated to '${url}'`);
     }
 
-    // Clean and truncate HTML content to reduce token usage
-    // private async getCleanContent(maxLength: number = 50000): Promise<string> {
-    //     // Get cleaned HTML from the page using DOM manipulation (more reliable than regex)
-    //     const cleaned = await this.page.evaluate(() => {
-    //         // Clone body to avoid modifying the original page
-    //         const bodyClone = document.body.cloneNode(true) as HTMLElement
-            
-    //         // Remove script tags and their content
-    //         const scripts = bodyClone.querySelectorAll('script')
-    //         scripts.forEach(script => script.remove())
-            
-    //         // Remove style tags and their content
-    //         const styles = bodyClone.querySelectorAll('style')
-    //         styles.forEach(style => style.remove())
-            
-    //         // Remove noscript tags (usually not needed for selector finding)
-    //         const noscripts = bodyClone.querySelectorAll('noscript')
-    //         noscripts.forEach(noscript => noscript.remove())
-            
-    //         // Return the cleaned innerHTML
-    //         return bodyClone.innerHTML
-    //     })
-        
-    //     // Remove HTML comments (they can be large and aren't needed)
-    //     let processed = cleaned.replace(/<!--[\s\S]*?-->/g, '')
-        
-    //     // Remove excessive whitespace (but preserve structure)
-    //     processed = processed.replace(/\s+/g, ' ').trim()
-        
-    //     // Truncate if still too long, preserving HTML structure
-    //     if (processed.length > maxLength) {
-    //         // Try to truncate at a tag boundary to avoid breaking HTML
-    //         const truncated = processed.substring(0, maxLength)
-    //         const lastTag = truncated.lastIndexOf('>')
-    //         if (lastTag > maxLength * 0.9) {
-    //             processed = truncated.substring(0, lastTag + 1) + '...'
-    //         } else {
-    //             processed = truncated + '...'
-    //         }
-    //     }
-        
-    //     return processed
-    // }
+    // Helper method to wrap generateObject and handle errors
+    private async safeGenerateObject<T>(config: Parameters<typeof generateObject>[0]): Promise<T> {
+        const result = await generateObject(config).catch((error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            // Write clean error message and exit immediately to prevent Node.js from printing stack trace
+            process.stderr.write(`❌ AI SDK Error: ${errorMessage}\n`)
+            process.exit(1)
+            // Never reached, but satisfies TypeScript
+            throw new Error(errorMessage)
+        })
+        return result.object as T
+    }
 
     async act(instruction: string, options?: ActOptions) {
         // Replace placeholders with provided variables
@@ -133,7 +102,7 @@ export class Cuehand {
 
         const content = await this.content();
 
-        const { object: selectorObject } = await generateObject({
+        const selectorObject = await this.safeGenerateObject<{ selector: string }>({
             model: this.options.model,
             system: `
                 You are an expert at picking the appropriate puppeteer selector to perform an action on a webpage.
@@ -146,7 +115,7 @@ export class Cuehand {
         })
 
 
-        const { object: actionObject } = await generateObject({
+        const actionObject = await this.safeGenerateObject<{ action: "click" | "fill" | "locate"; value?: string }>({
             model: this.options.model,
             system: `
                 You are an expert at picking puppeteer actions to perform on a webpage.
@@ -227,7 +196,7 @@ export class Cuehand {
     async observe(instruction: string) {
         const content = await this.content();
 
-        const { object: selectorObject } = await generateObject({
+        const selectorObject = await this.safeGenerateObject<{ action?: { found?: boolean } }>({
             model: this.options.model,
             system: `
                 You are an expert at picking the appropriate puppeteer selector to perform an action on a webpage.
@@ -320,7 +289,7 @@ export class Cuehand {
         }
 
     
-        const { object } = await generateObject({
+        const object = await this.safeGenerateObject<z.infer<T>>({
             model: this.options.model,
             system: `
                 You are an expert web content extraction agent.
@@ -336,6 +305,6 @@ export class Cuehand {
         });
     
         console.log("📦 Extracted data");
-        return object as z.infer<T>;
+        return object;
     }
 }
