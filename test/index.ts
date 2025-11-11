@@ -1,10 +1,9 @@
+import "dotenv/config";
 import { google } from "@ai-sdk/google"
 import { Cuehand } from "../src"
 
-// TODO: Ensure GOOGLE_GENERATIVE_AI_API_KEY is set in your environment
-// ! The 'LOCAL' type opens a visible browser by default
 async function main() {
-  const model = google("gemini-1.5-flash")
+  const model = google("gemini-2.5-flash")
 
   const cuehand = new Cuehand({
     type: "LOCAL",
