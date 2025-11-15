@@ -1,7 +1,7 @@
 {
   "name": "cuehand",
   "version": "1.0.6",
-  "description": "AI-powered Puppeteer SDK for automated browser actions",
+  "description": "AI-powered Playwright SDK for automated browser actions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "keywords": [
     "sdk",
-    "puppeteer",
+    "playwright",
     "automation",
     "ai",
     "google-ai",
@@ -25,14 +25,15 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.31",
     "ai": "^5.0.92",
+    "chalk": "^5.6.2",
     "dotenv": "^16.4.7",
-    "puppeteer": "^24.29.1",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-adblocker": "^2.13.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "jsdom": "^27.2.0",
+    "ora": "^9.0.0",
+    "playwright": "^1.56.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^22.13.5",
     "tsup": "^8.0.0",
     "tsx": "^4.19.3",
