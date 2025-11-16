@@ -1,1 +1,1 @@
-export * from "./Cuehand-v1"
+export * from "./Cuehand"
