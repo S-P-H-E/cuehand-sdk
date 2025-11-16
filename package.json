@@ -1,6 +1,6 @@
 {
   "name": "cuehand",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "AI-powered Playwright SDK for automated browser actions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

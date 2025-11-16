@@ -1,93 +1,67 @@
-import { LanguageModel } from "ai";
 import { Browser, chromium, Page, LaunchOptions, BrowserContext } from "playwright";
-import { act, close, goto, observe, wait } from "./actions";
 import chalk from "chalk";
-
-export type AIModel = LanguageModel | string;
+import ora from "ora";
 
 interface CuehandBaseOptions {
-    model: AIModel;
-    userDataDir?: string; // persistent profile path
+    userDataDir?: string;
 }
 
-type CuehandOptions =
-  | (CuehandBaseOptions & { type: "LOCAL"; headless?: boolean })
-  | (CuehandBaseOptions & { type: "DOCKER"; headless?: true });
-
-// Optional variables for the act() LLM step
-export interface ActOptions {
-    variables?: Record<string, string>;
-}
+type CuehandOptions = (CuehandBaseOptions & { type: "LOCAL"; headless?: boolean }) | (CuehandBaseOptions & { type: "DOCKER"; headless?: true });
 
 export class Cuehand {
-    private browser!: Browser;
-    public context!: BrowserContext;
-    private page!: Page;
-    private options: CuehandOptions;
+  private browser!: Browser;
+  public context!: BrowserContext;
+  private page!: Page;
+  private options: CuehandOptions;
 
-    constructor(options: CuehandOptions) {
-        // Store user options internally
-        this.options = options;
-    }
-
-    // ────────────────────────────────────────────
-    // ✔ Start Playwright browser
-    // ────────────────────────────────────────────
-
-    async init() {
-        // Decide headless mode:
-        // - LOCAL defaults to headful (headless: false)
-        // - DOCKER must be headless (true)
-        const headless = this.options.type === "DOCKER" ? true : this.options.headless ?? false;
-        const launchOptions: LaunchOptions = { headless };
-        // ────────────────────────────────────────────────
-        // ✔ Persistent Context (userDataDir)
-        // - Behaves exactly like Puppeteer’s userDataDir
-        // ────────────────────────────────────────────────
-        if (this.options.userDataDir) {
-            // Create persistent browser profile
-                this.context = await chromium.launchPersistentContext(
-                this.options.userDataDir,
-                launchOptions
-            );
+  constructor(options: CuehandOptions) {
+      this.options = options;
+  }
     
-            // Try to use the first page, otherwise create one
-            this.page = this.context.pages()[0] ?? await this.context.newPage();
+  async init() {
+      const headless = this.options.type === "DOCKER" ? true : this.options.headless ?? false;
+      const launchOptions: LaunchOptions = { headless };
+      if (this.options.userDataDir) {
+              this.context = await chromium.launchPersistentContext(
+              this.options.userDataDir,
+              launchOptions
+          );
+          this.page = this.context.pages()[0] ?? await this.context.newPage();
+          
+          console.log(`${chalk.green("[INFO]")} Persistent session loaded ${chalk.gray(this.options.userDataDir)}`);
+          return;
+      }
+      this.browser = await chromium.launch(launchOptions);
+      this.context = await this.browser.newContext();
+      this.page = await this.context.newPage();
 
-            console.log(`${chalk.green("[INFO]")} Persistent session loaded ${chalk.gray(this.options.userDataDir)}`);
-            return;
-        }
+      console.log(`${chalk.green("[INFO]")} Browser launched`);
+  }
     
-        // ────────────────────────────────────────────────
-        // ✔ Normal (non‑persistent) browser
-        // ────────────────────────────────────────────────
-        this.browser = await chromium.launch(launchOptions);
-        this.context = await this.browser.newContext();
-        this.page = await this.context.newPage();
-    
-        console.log(`${chalk.green("[INFO]")} Browser launched`);
-    }
+  async goto(url: string) {
+    await this.page.goto(url);
+    console.log(`${chalk.green("[INFO]")} Navigated to ${chalk.cyan(url)}`);
+  }
 
-    // ────────────────────────────────────────────
-    // EXPOSE ACTIONS
-    // ────────────────────────────────────────────
-    async goto(url: string) {
-        await goto(this.page, url);
-    }
+  async wait(seconds: number) {
+    const spinner = ora({
+      text: `Waiting for ${seconds} seconds...`,
+      spinner: "dots",
+      prefixText: `${chalk.yellow("[DELAY]")}`,
+    }).start();
+  
+    await new Promise((res) => setTimeout(res, seconds * 1000));
+    spinner.succeed(`Waited ${seconds} seconds`);
+  }
 
-    async wait(seconds: number) {
-        await wait(seconds);
+  async close() {
+    if (this.context) {
+      await this.context.close();
+      console.log(`${chalk.green("[INFO]")} Context closed, state persisted`);
     }
-
-    async act(instruction: string, options?: ActOptions) {
-        await act(instruction, this.page, this.options.model, options);
+    if (this.browser) {
+      await this.browser.close();
+      console.log(`${chalk.green("[INFO]")} Browser closed`);
     }
-
-    async observe(instruction: string) {
-        return await observe(instruction, this.page, this.options.model);
-    }
-
-    async close() {
-        await close(this.context, this.browser);
-    }
+  }
 }
