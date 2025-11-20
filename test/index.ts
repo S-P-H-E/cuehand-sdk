@@ -12,7 +12,9 @@ async function main() {
 
   await cuehand.goto("https://ollama.com/");
 
-  const [action] = await cuehand.observe("click the search bar at the top");
+  const [action] = await cuehand.observe("find the search bar at the top");
+
+  console.log(action);
 
   if (action) {
     await cuehand.act(action);

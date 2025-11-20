@@ -36,7 +36,7 @@ export class Cuehand {
             
             this.context = await chromium.launchPersistentContext(
                 this.options.userDataDir,
-                internalPlaywrightLaunchOptions
+                internalPlaywrightLaunchOptions,
             );
 
             // Ensure there's at least one page, using Playwright's newPage
