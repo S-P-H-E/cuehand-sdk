@@ -152,7 +152,7 @@ export class Cuehand {
     }
 
     async close() {
-        const spinner = ora('Closing browser and Stagehand...').start();
+        const spinner = ora('Closing browser...').start();
         if (this.stagehand) {
             await this.stagehand.close();
         }
@@ -162,6 +162,6 @@ export class Cuehand {
         if (this.context && !this.browser) {
             await this.context.close();
         }
-        spinner.succeed(`${chalk.green("[INFO]")} Browser and Stagehand closed.`);
+        spinner.succeed(`${chalk.green("[INFO]")} Browser closed.`);
     }
 }
