@@ -53,7 +53,7 @@ export class Cuehand {
             // ! add logging here
             
             this.browser = await chromium.launch(internalPlaywrightLaunchOptions);
-            this.context = await this.browser.newContext({ recordVideo: { dir: "videos" }});
+            this.context = await this.browser.newContext();
             this.page = await this.context.newPage();
 
             // ! add logging here
@@ -116,11 +116,6 @@ export class Cuehand {
         
         // Type assertion is often needed here as TS struggles to narrow generic conditional returns inside the body
         return (await this.stagehand.extract(instruction)) as any;
-    }
-
-    async videoPath() {
-     const videoPath = await this.page.video()?.path();
-     return videoPath;
     }
 
     async wait(seconds: number) {
